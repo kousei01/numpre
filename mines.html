@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>マインスイーパー</title>
+  <meta name="theme-color" content="#f6f3ee">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="パズル">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="mines.css">
+</head>
+<body>
+  <main class="app">
+    <header class="top">
+      <a href="./" class="back" aria-label="ゲーム一覧へ">‹</a>
+      <select id="level" aria-label="難易度">
+        <option value="0">入門</option>
+        <option value="1">初級</option>
+        <option value="2">中級</option>
+        <option value="3">上級</option>
+        <option value="4">鬼</option>
+      </select>
+      <div class="status">
+        <span id="left">💣 0</span>
+        <span id="timer">00:00</span>
+      </div>
+      <button id="restart" class="btn-text">新しく</button>
+    </header>
+
+    <div id="field" class="field" role="grid" aria-label="マインスイーパー盤面"></div>
+
+    <div class="mtools">
+      <button id="modeOpen" class="mode on">⛏ 開く</button>
+      <button id="modeFlag" class="mode">🚩 旗</button>
+    </div>
+    <p class="help">長押しでも旗を立てられます。数字をタップすると、旗が足りていれば周りをまとめて開きます。</p>
+  </main>
+
+  <div id="overlay" class="overlay" hidden>
+    <div class="dialog">
+      <h2 id="dialogTitle"></h2>
+      <p id="dialogBody"></p>
+      <button id="dialogBtn" class="btn-primary">もう一度</button>
+      <button id="dialogClose" class="btn-text" style="margin-top:8px">盤面を見る</button>
+    </div>
+  </div>
+
+  <script src="mines-core.js"></script>
+  <script src="mines.js"></script>
+</body>
+</html>

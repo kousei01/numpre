@@ -1,0 +1,56 @@
+/* ===== マインスイーパー 固有のスタイル（共通部分は style.css） ===== */
+:root {
+  --tile: #c9d3e3;
+  --tile-hi: #dbe3f0;
+  --open: #ffffff;
+  --mine-bg: #f3b3b3;
+  --n1: #2f5fd0; --n2: #2e8b57; --n3: #d23c3c; --n4: #5a3fb0;
+  --n5: #a0522d; --n6: #138a8a; --n7: #333; --n8: #888;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tile: #3a4254;
+    --tile-hi: #46506a;
+    --open: #1e2129;
+    --mine-bg: #6b2b2e;
+    --n1: #7fa2ff; --n2: #6fd39b; --n3: #ff7f7f; --n4: #b9a2ff;
+    --n5: #e0a070; --n6: #5fd6d6; --n7: #ddd; --n8: #aaa;
+  }
+}
+
+.top select { padding: 8px 6px; }
+
+.field {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  gap: 2px;
+  width: 100%;
+  -webkit-touch-callout: none;   /* 長押しメニューを出さない */
+}
+.tile {
+  aspect-ratio: 1;
+  min-width: 0;
+  border-radius: 4px;
+  background: var(--tile);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800;
+  font-size: calc(min(100vw, 520px) / var(--cols) * 0.55);
+  line-height: 1;
+  -webkit-touch-callout: none;
+}
+.tile.pressed { background: var(--tile-hi); }
+.tile.open { background: var(--open); }
+.tile.boom { background: var(--mine-bg); }
+.tile.wrong { background: var(--mine-bg); opacity: .7; }
+.tile.n1 { color: var(--n1); } .tile.n2 { color: var(--n2); }
+.tile.n3 { color: var(--n3); } .tile.n4 { color: var(--n4); }
+.tile.n5 { color: var(--n5); } .tile.n6 { color: var(--n6); }
+.tile.n7 { color: var(--n7); } .tile.n8 { color: var(--n8); }
+
+.mtools { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mode {
+  padding: 12px; border-radius: 12px; border: 1px solid var(--line);
+  background: var(--surface); font-weight: 700; color: var(--muted);
+}
+.mode.on { border-color: var(--accent); color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.help { margin: 0; font-size: 12px; color: var(--muted); text-align: center; line-height: 1.6; }

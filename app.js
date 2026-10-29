@@ -358,6 +358,34 @@ function init() {
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
+    navigator.serviceWorker.addEventListener('controllerchange', checkOffline);
+  }
+  checkOffline();
+}
+
+// オフラインで起動できる状態かを画面に表示する
+async function checkOffline() {
+  const el = $('#offline');
+  const show = (text, cls) => { el.textContent = text; el.className = 'offline ' + (cls || ''); };
+  const standalone = window.navigator.standalone === true ||
+    window.matchMedia('(display-mode: standalone)').matches;
+
+  if (!('serviceWorker' in navigator)) return show('この環境はオフライン非対応です', 'warn');
+  if (!location.pathname.endsWith('/') && !location.pathname.endsWith('.html')) {
+    return show('URLの末尾に「/」をつけて開き直してください', 'warn');
+  }
+  try {
+    await navigator.serviceWorker.ready;
+    const keys = await caches.keys();
+    const cached = keys.some((k) => k.startsWith('numpre-'));
+    if (cached && navigator.serviceWorker.controller) {
+      show(standalone ? '✓ オフライン準備OK（機内モードでも起動できます）'
+                      : '✓ オフライン準備OK（Safariで開いています。ホーム画面のアイコンからも一度開いてください）', 'ok');
+    } else {
+      show('オフライン準備中…一度アプリを閉じて開き直してください');
+    }
+  } catch {
+    show('オフライン準備に失敗しました', 'warn');
   }
 }
 

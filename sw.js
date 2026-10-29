@@ -1,13 +1,21 @@
 // ===== Service Worker：アプリ一式をキャッシュしてオフラインで動かす =====
 // ファイルを更新したら CACHE の番号を上げること（v1 → v2）
-const CACHE = 'numpre-v2';
+const CACHE = 'numpre-v4';
 const ASSETS = [
   './',
-  './index.html',
-  './style.css',
+  './index.html',      // ゲーム選択画面
+  './style.css',       // 共通スタイル
+  // ナンプレ
+  './numpre.html',
   './sudoku.js',
   './app.js',
   './worker.js',
+  // マインスイーパー
+  './mines.html',
+  './mines.css',
+  './mines-core.js',
+  './mines.js',
+  // 共通
   './manifest.json',
   './icons/icon-180.png',
   './icons/icon-192.png',

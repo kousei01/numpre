@@ -3,62 +3,77 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-  <title>ナンプレ</title>
+  <title>パズル</title>
   <meta name="theme-color" content="#f6f3ee">
-  <!-- iPhone でホーム画面に追加したときの設定 -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="ナンプレ">
+  <meta name="apple-mobile-web-app-title" content="パズル">
   <link rel="apple-touch-icon" href="icons/icon-180.png">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
+  <style>
+    .hub h1 { font-size: 28px; margin: 8px 4px 4px; }
+    .hub .sub { color: var(--muted); margin: 0 4px 8px; font-size: 14px; }
+    .games { display: grid; gap: 12px; }
+    .game {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--surface); border-radius: 16px; padding: 16px;
+      color: inherit; text-decoration: none;
+      box-shadow: 0 1px 2px rgba(0,0,0,.06);
+    }
+    .game:active { transform: scale(.98); }
+    .game .ico {
+      width: 56px; height: 56px; border-radius: 14px; flex: none;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 30px; color: #fff;
+    }
+    .game h2 { font-size: 18px; margin: 0 0 4px; }
+    .game p { margin: 0; font-size: 13px; color: var(--muted); }
+    .game .resume { color: var(--accent); font-weight: 600; }
+    .chev { margin-left: auto; color: var(--muted); font-size: 22px; }
+    .hub .offline { margin-top: auto; }
+  </style>
 </head>
 <body>
-  <main class="app">
-    <header class="top">
-      <select id="difficulty" aria-label="難易度">
-        <option value="easy">かんたん</option>
-        <option value="normal">ふつう</option>
-        <option value="hard">むずかしい</option>
-        <option value="expert">超むずかしい</option>
-        <option value="extreme">エクストリーム</option>
-      </select>
-      <div class="status">
-        <span id="mistakes">ミス 0</span>
-        <span id="timer">00:00</span>
-      </div>
-      <button id="newGame" class="btn-text">新しい問題</button>
-    </header>
+  <main class="app hub">
+    <h1>パズル</h1>
+    <p class="sub">オフラインで遊べるミニゲーム</p>
 
-    <div id="board" class="board" role="grid" aria-label="ナンプレ盤面"></div>
+    <nav class="games">
+      <a class="game" href="numpre.html">
+        <div class="ico" style="background:#2f5fd0">9</div>
+        <div>
+          <h2>ナンプレ</h2>
+          <p id="numpreInfo">5段階・エクストリームは極小ヒント</p>
+        </div>
+        <span class="chev">›</span>
+      </a>
+      <a class="game" href="mines.html">
+        <div class="ico" style="background:#3b8a5a">💣</div>
+        <div>
+          <h2>マインスイーパー</h2>
+          <p id="minesInfo">5段階・運に頼らず論理だけで解ける盤面</p>
+        </div>
+        <span class="chev">›</span>
+      </a>
+    </nav>
 
-    <div class="tools">
-      <button id="undo" class="tool"><span class="icon">↶</span>戻す</button>
-      <button id="erase" class="tool"><span class="icon">⌫</span>消す</button>
-      <button id="memo" class="tool"><span class="icon">✎</span>メモ<span id="memoState" class="badge">OFF</span></button>
-      <button id="hint" class="tool"><span class="icon">💡</span>ヒント</button>
-    </div>
-
-    <div id="pad" class="pad"></div>
+    <p id="offline" class="offline"></p>
   </main>
 
-  <div id="loading" class="overlay loading" hidden>
-    <div class="dialog">
-      <div class="spinner"></div>
-      <p>問題を作成中…</p>
-    </div>
-  </div>
-
-  <div id="overlay" class="overlay" hidden>
-    <div class="dialog">
-      <h2 id="dialogTitle">クリア！</h2>
-      <p id="dialogBody"></p>
-      <button id="dialogBtn" class="btn-primary">次の問題へ</button>
-    </div>
-  </div>
-
-  <script src="sudoku.js"></script>
-  <script src="app.js"></script>
+  <script>
+    // 途中のゲームがあれば「続きから」と表示
+    function read(key) { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } }
+    const n = read('numpre-save-v1');
+    if (n && !n.completed && n.history && n.history.length) {
+      document.getElementById('numpreInfo').innerHTML = '<span class="resume">続きから遊べます</span>';
+    }
+    const m = read('mines-save-v1');
+    if (m && m.status === 'playing') {
+      document.getElementById('minesInfo').innerHTML = '<span class="resume">続きから遊べます</span>';
+    }
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  </script>
 </body>
 </html>

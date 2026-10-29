@@ -1,6 +1,6 @@
 {
-  "name": "ナンプレ",
-  "short_name": "ナンプレ",
+  "name": "パズル",
+  "short_name": "パズル",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
