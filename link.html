@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>ナンバーリンク</title>
+  <meta name="theme-color" content="#f6f3ee">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="暇つぶし集">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="link.css">
+</head>
+<body>
+  <main class="app">
+    <header class="top">
+      <a href="./" class="back" aria-label="ゲーム一覧へ">‹</a>
+      <select id="level" aria-label="難易度">
+        <option value="0">入門 5×5</option>
+        <option value="1">初級 6×6</option>
+        <option value="2">中級 7×7</option>
+        <option value="3">上級 8×8</option>
+        <option value="4">鬼 9×9</option>
+      </select>
+      <div class="status">
+        <span id="timer">00:00</span>
+      </div>
+      <button id="restart" class="btn-text">新しく</button>
+    </header>
+
+    <div class="progress">
+      <span id="lines">ライン 0/0</span>
+      <span id="fill">埋め 0%</span>
+    </div>
+
+    <svg id="board" class="lboard" xmlns="http://www.w3.org/2000/svg"></svg>
+
+    <p id="note" class="note">同じ数字同士を線でつなぎ、すべてのマスを埋めよう</p>
+
+    <div class="tools">
+      <button id="undo" class="tool"><span class="icon">↶</span>戻す</button>
+      <button id="clear" class="tool"><span class="icon">⟲</span>全消し</button>
+      <button id="hint" class="tool"><span class="icon">💡</span>ヒント</button>
+      <button id="answer" class="tool"><span class="icon">👁</span>答え</button>
+    </div>
+  </main>
+
+  <div id="loading" class="overlay" hidden>
+    <div class="dialog" style="max-width:220px">
+      <div class="spinner"></div>
+      <p style="margin:12px 0 0">問題を作成中…</p>
+    </div>
+  </div>
+
+  <div id="overlay" class="overlay" hidden>
+    <div class="dialog">
+      <h2 id="dialogTitle">クリア！</h2>
+      <p id="dialogBody"></p>
+      <button id="dialogBtn" class="btn-primary">次の問題へ</button>
+    </div>
+  </div>
+
+  <script src="link-core.js"></script>
+  <script src="link.js"></script>
+</body>
+</html>
