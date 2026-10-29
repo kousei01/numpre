@@ -1,6 +1,6 @@
 // ===== Service Worker：アプリ一式をキャッシュしてオフラインで動かす =====
 // ファイルを更新したら CACHE の番号を上げること（v1 → v2）
-const CACHE = 'numpre-v4';
+const CACHE = 'numpre-v5';
 const ASSETS = [
   './',
   './index.html',      // ゲーム選択画面

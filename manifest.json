@@ -1,6 +1,6 @@
 {
-  "name": "パズル",
-  "short_name": "パズル",
+  "name": "暇つぶし集",
+  "short_name": "暇つぶし集",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
