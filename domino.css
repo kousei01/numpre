@@ -1,0 +1,76 @@
+/* ===== ドミノ倒し 固有のスタイル（共通部分は style.css） ===== */
+:root {
+  --d-board: #ffffff;
+  --d-floor: #eef0f4;
+  --d-start: #ffe7a3;
+  --d-piece: #2b2f3a;
+  --d-lock: #6b7280;
+  --d-hint: #c9851b;
+  --d-arrow: #ffffff;
+  --d-stop: #e5484d;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --d-board: #1a1d24;
+    --d-floor: #262a33;
+    --d-start: #5a4a1a;
+    --d-piece: #e9e4d8;
+    --d-lock: #9aa0ab;
+    --d-hint: #f0b44c;
+    --d-arrow: #1f2430;
+  }
+}
+
+.dstatus {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 14px; color: var(--muted); margin: -4px 2px 0;
+}
+.stars { color: #f5b301; letter-spacing: 2px; font-size: 16px; }
+.stars .off { color: var(--line); }
+
+.dboard {
+  width: 100%; aspect-ratio: 1; display: block;
+  background: var(--d-board); border-radius: 12px;
+  touch-action: none;
+}
+.dboard.shake { animation: shake .35s; }
+@keyframes shake {
+  20% { transform: translateX(-6px); } 40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); } 80% { transform: translateX(3px); }
+}
+.dboard.win { animation: winpulse .7s ease; }
+@keyframes winpulse { 40% { transform: scale(1.03); } }
+
+.note { margin: 0; font-size: 13px; color: var(--muted); text-align: center; min-height: 1.5em; }
+.note.bad { color: var(--d-stop); font-weight: 700; }
+.note.good { color: #30a46c; font-weight: 700; }
+
+.push {
+  width: 100%; padding: 14px; border: none; border-radius: 14px;
+  background: var(--accent); color: var(--surface);
+  font-size: 18px; font-weight: 800; letter-spacing: 1px;
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--accent) 60%, #000);
+}
+.push:active { transform: translateY(3px); box-shadow: 0 1px 0 color-mix(in srgb, var(--accent) 60%, #000); }
+.push:disabled { opacity: .45; }
+
+.app .tools { grid-template-columns: repeat(5, 1fr); }
+
+.big-stars { font-size: 34px; color: #f5b301; letter-spacing: 4px; margin-bottom: 4px; }
+.big-stars .off { color: var(--line); }
+.big-stars span { display: inline-block; animation: pop .45s cubic-bezier(.3,1.6,.5,1) both; }
+.big-stars span:nth-child(2) { animation-delay: .15s; }
+.big-stars span:nth-child(3) { animation-delay: .3s; }
+@keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+
+.help-dialog { text-align: left; max-width: 360px; }
+.help-dialog h2 { text-align: center; }
+.help-dialog ol { padding-left: 1.2em; margin: 0 0 12px; line-height: 1.7; font-size: 14px; }
+.help-tip { font-size: 13px; color: var(--muted); line-height: 1.6; white-space: normal !important; }
+
+.spinner {
+  width: 36px; height: 36px; margin: 0 auto;
+  border: 4px solid var(--line); border-top-color: var(--accent);
+  border-radius: 50%; animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

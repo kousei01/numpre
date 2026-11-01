@@ -70,6 +70,20 @@
         </div>
         <span class="chev">›</span>
       </a>
+      <a class="game" href="domino.html">
+        <div class="ico" style="background:#e0533d">
+          <svg viewBox="0 0 10 10" width="34" height="34" aria-hidden="true">
+            <rect x="1.2" y="2.2" width="1.4" height="5.6" rx=".3" fill="#fff" transform="rotate(-38 1.9 7.8)"/>
+            <rect x="4.3" y="2.2" width="1.4" height="5.6" rx=".3" fill="#fff" fill-opacity=".85" transform="rotate(-14 5 7.8)"/>
+            <rect x="7.4" y="2.2" width="1.4" height="5.6" rx=".3" fill="#fff" fill-opacity=".7"/>
+          </svg>
+        </div>
+        <div>
+          <h2>ドミノ倒し</h2>
+          <p id="dominoInfo">5段階・矢印をそろえて一発で全部倒す</p>
+        </div>
+        <span class="chev">›</span>
+      </a>
     </nav>
 
     <p id="offline" class="offline"></p>
@@ -89,6 +103,10 @@
     const l = read('link-save-v1');
     if (l && l.status === 'playing' && l.history && l.history.length) {
       document.getElementById('linkInfo').innerHTML = '<span class="resume">続きから遊べます</span>';
+    }
+    const dm = read('domino-save-v1');
+    if (dm && dm.status === 'playing' && ((dm.history && dm.history.length) || dm.tries)) {
+      document.getElementById('dominoInfo').innerHTML = '<span class="resume">続きから遊べます</span>';
     }
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   </script>

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>ドミノ倒し</title>
+  <meta name="theme-color" content="#f6f3ee">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="暇つぶし集">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="domino.css">
+</head>
+<body data-game="domino">
+  <main class="app">
+    <header class="top">
+      <a href="./" class="back" aria-label="ゲーム一覧へ">‹</a>
+      <select id="level" aria-label="難易度">
+        <option value="0">入門 4×4</option>
+        <option value="1">初級 5×5</option>
+        <option value="2">中級 6×6</option>
+        <option value="3">上級 7×7</option>
+        <option value="4">鬼 8×8</option>
+      </select>
+      <div class="status"><span id="timer">00:00</span></div>
+      <button id="restart" class="btn-text">新しく</button>
+    </header>
+
+    <div class="dstatus">
+      <span id="tries">挑戦 1回目</span>
+      <span id="stars" class="stars">★★★</span>
+    </div>
+
+    <svg id="board" class="dboard" xmlns="http://www.w3.org/2000/svg" aria-label="ドミノの盤面"></svg>
+
+    <p id="note" class="note">タップで回転・スワイプで向きを指定。全部倒れるように並べよう</p>
+
+    <button id="push" class="push">👉 倒す！</button>
+
+    <div class="tools">
+      <button id="undo" class="tool"><span class="icon">↶</span>戻す</button>
+      <button id="reset" class="tool"><span class="icon">⟲</span>リセット</button>
+      <button id="hint" class="tool"><span class="icon">💡</span>ヒント</button>
+      <button id="answer" class="tool"><span class="icon">👁</span>答え</button>
+      <button id="sound" class="tool"><span class="icon" id="soundIcon">🔇</span><span id="soundLabel">音 OFF</span></button>
+    </div>
+  </main>
+
+  <div id="loading" class="overlay" hidden>
+    <div class="dialog" style="max-width:220px">
+      <div class="spinner"></div>
+      <p style="margin:12px 0 0">ドミノを並べています…</p>
+    </div>
+  </div>
+
+  <div id="overlay" class="overlay" hidden>
+    <div class="dialog">
+      <div id="dialogStars" class="big-stars">★★★</div>
+      <h2 id="dialogTitle">全部倒れた！</h2>
+      <p id="dialogBody"></p>
+      <button id="dialogBtn" class="btn-primary">次の問題へ</button>
+      <button id="dialogClose" class="btn-text" style="margin-top:8px">盤面を見る</button>
+    </div>
+  </div>
+
+  <div id="helpBox" class="overlay" hidden>
+    <div class="dialog help-dialog">
+      <h2>遊び方</h2>
+      <ol>
+        <li>ドミノは矢印の向きに倒れ、倒れた先のドミノも連鎖して倒れます。</li>
+        <li>空いたマスをタップすると矢印が回ります。スワイプするとその向きになります。🔒のドミノは動かせません。</li>
+        <li>黄色いマス（右上に <b>S</b>）がスタートです。<b>「倒す！」で全部のドミノが倒れたらクリア</b>。</li>
+        <li>盤の外・穴・倒れたドミノに向かうと、そこで連鎖が止まります。</li>
+      </ol>
+      <p class="help-tip">1回目の「倒す！」で全部倒せたら★3。よく考えてから押そう。</p>
+      <button id="helpClose" class="btn-primary">わかった</button>
+    </div>
+  </div>
+
+  <script src="domino-core.js"></script>
+  <script src="layout.js"></script>
+  <script src="domino.js"></script>
+</body>
+</html>
