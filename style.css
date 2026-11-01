@@ -175,3 +175,49 @@ button, select { font: inherit; color: inherit; }
   font-size: 34px; line-height: 1; color: var(--accent);
   text-decoration: none; padding: 0 6px 4px 0;
 }
+
+/* ===== 配置の調整（layout.js） ===== */
+.app { transform-origin: top center; position: relative; }
+body.moved { position: fixed; inset: 0; overflow: hidden; }
+body.moved .app { min-height: 0; }
+.layout-btn {
+  flex: none; display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; padding: 0; border: none; border-radius: 10px;
+  background: none; color: var(--muted);
+}
+body.layout-editing .layout-btn { background: var(--accent); color: var(--surface); position: relative; z-index: 60; }
+.layout-cover {
+  display: none; position: absolute; inset: 0; z-index: 50;
+  border: 2px dashed var(--accent); border-radius: 14px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  touch-action: none; align-items: center; justify-content: center; text-align: center;
+}
+.layout-cover span {
+  background: var(--accent); color: var(--surface); font-size: 13px; font-weight: 700;
+  padding: 8px 14px; border-radius: 999px; line-height: 1.5;
+}
+body.layout-editing .layout-cover { display: flex; }
+.layout-panel {
+  position: fixed; left: 8px; right: 8px; bottom: calc(env(safe-area-inset-bottom) + 8px);
+  max-width: 520px; margin: 0 auto; z-index: 100;
+  background: var(--surface); border-radius: 16px; padding: 12px 14px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.18);
+  display: grid; gap: 10px;
+}
+.layout-panel[hidden] { display: none; }
+.lp-row { display: flex; align-items: center; gap: 10px; }
+.lp-row input { flex: 1; accent-color: var(--accent); }
+.lp-label { font-size: 13px; color: var(--muted); }
+.lp-pct { width: 3em; text-align: right; font-variant-numeric: tabular-nums; font-size: 13px; }
+.lp-btns button {
+  flex: 1; padding: 9px 0; border: 1px solid var(--line); border-radius: 10px;
+  background: none; font-size: 13px; font-weight: 600;
+}
+.lp-btns .lp-done { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+
+/* ヘッダーの文字を折り返さない */
+.top > * { white-space: nowrap; }
+.top select { min-width: 0; flex: 0 1 auto; text-overflow: ellipsis; }
+.top .status { gap: 8px; }
+.top select { font-size: 15px; padding: 7px 4px 7px 8px; }
+.top { gap: 6px; }

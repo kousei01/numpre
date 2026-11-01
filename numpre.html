@@ -14,7 +14,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body data-game="numpre">
   <main class="app">
     <header class="top">
       <a href="./" class="back" aria-label="ゲーム一覧へ">‹</a>
@@ -29,7 +29,7 @@
         <span id="mistakes">ミス 0</span>
         <span id="timer">00:00</span>
       </div>
-      <button id="newGame" class="btn-text">新しい問題</button>
+      <button id="newGame" class="btn-text">新しく</button>
     </header>
 
     <p id="offline" class="offline">オフライン準備を確認中…</p>
@@ -62,6 +62,7 @@
   </div>
 
   <script src="sudoku.js"></script>
+  <script src="layout.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
