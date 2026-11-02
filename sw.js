@@ -1,6 +1,6 @@
 // ===== Service Worker：アプリ一式をキャッシュしてオフラインで動かす =====
 // ファイルを更新したら CACHE の番号を上げること（v1 → v2）
-const CACHE = 'numpre-v9';
+const CACHE = 'numpre-v10';
 const ASSETS = [
   './',
   './index.html',      // ゲーム選択画面
@@ -27,6 +27,11 @@ const ASSETS = [
   './domino-core.js',
   './domino-worker.js',
   './domino.js',
+  // 光の回路
+  './light.html',
+  './light.css',
+  './light-core.js',
+  './light.js',
   // 共通
   './layout.js',       // 配置の調整（共通）
   './manifest.json',

@@ -84,6 +84,20 @@
         </div>
         <span class="chev">›</span>
       </a>
+      <a class="game" href="light.html">
+        <div class="ico" style="background:#151b2b">
+          <svg viewBox="0 0 10 10" width="34" height="34" aria-hidden="true">
+            <path d="M1.5 7.5 H5 V2.5 H8.5" fill="none" stroke="#ffd54a" stroke-width=".9" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="1.5" cy="7.5" r="1.1" fill="#ffd54a"/>
+            <path d="M8.5 1.3 L9.6 2.5 L8.5 3.7 L7.4 2.5 Z" fill="#8fe3ff"/>
+          </svg>
+        </div>
+        <div>
+          <h2>光の回路</h2>
+          <p id="lightInfo">5段階・鏡を回して全部の宝石に光を当てる</p>
+        </div>
+        <span class="chev">›</span>
+      </a>
     </nav>
 
     <p id="offline" class="offline"></p>
@@ -107,6 +121,10 @@
     const dm = read('domino-save-v1');
     if (dm && dm.status === 'playing' && ((dm.history && dm.history.length) || dm.tries)) {
       document.getElementById('dominoInfo').innerHTML = '<span class="resume">続きから遊べます</span>';
+    }
+    const lt = read('light-save-v1');
+    if (lt && lt.status === 'playing' && lt.taps) {
+      document.getElementById('lightInfo').innerHTML = '<span class="resume">続きから遊べます</span>';
     }
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   </script>

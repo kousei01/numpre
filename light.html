@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>光の回路</title>
+  <meta name="theme-color" content="#f6f3ee">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="暇つぶし集">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="light.css">
+</head>
+<body data-game="light">
+  <main class="app">
+    <header class="top">
+      <a href="./" class="back" aria-label="ゲーム一覧へ">‹</a>
+      <select id="level" aria-label="難易度">
+        <option value="0">入門 5×5</option>
+        <option value="1">初級 6×6</option>
+        <option value="2">中級 6×6</option>
+        <option value="3">上級 7×7</option>
+        <option value="4">鬼 8×8</option>
+      </select>
+      <div class="status"><span id="timer">00:00</span></div>
+      <button id="restart" class="btn-text">新しく</button>
+    </header>
+
+    <div class="lstatus">
+      <span id="gems">💎 0 / 0</span>
+      <span id="taps">0 手（目安 0 手）</span>
+      <span id="stars" class="stars"></span>
+    </div>
+
+    <svg id="board" class="lboard2" xmlns="http://www.w3.org/2000/svg" aria-label="光の回路の盤面"></svg>
+
+    <p id="note" class="note">鏡をタップして向きを変え、全部の宝石に光を当てよう</p>
+
+    <div id="legend" class="legend"></div>
+
+    <div class="tools">
+      <button id="undo" class="tool"><span class="icon">↶</span>戻す</button>
+      <button id="reset" class="tool"><span class="icon">⟲</span>リセット</button>
+      <button id="hint" class="tool"><span class="icon">💡</span>ヒント</button>
+      <button id="answer" class="tool"><span class="icon">👁</span>答え</button>
+      <button id="sound" class="tool"><span class="icon" id="soundIcon">🔇</span><span id="soundLabel">音 OFF</span></button>
+    </div>
+  </main>
+
+  <div id="overlay" class="overlay" hidden>
+    <div class="dialog">
+      <div id="dialogStars" class="big-stars"></div>
+      <h2 id="dialogTitle">回路完成！</h2>
+      <p id="dialogBody"></p>
+      <button id="dialogBtn" class="btn-primary">次の問題へ</button>
+      <button id="dialogClose" class="btn-text" style="margin-top:8px">盤面を見る</button>
+    </div>
+  </div>
+
+  <div id="helpBox" class="overlay" hidden>
+    <div class="dialog help-dialog">
+      <h2>遊び方</h2>
+      <ol>
+        <li>光源から出た光は、<b>鏡</b>に当たると90°曲がります。鏡をタップすると ／ と ＼ が切り替わります。</li>
+        <li><b>全部の宝石に光を当てたら完成</b>。光は宝石を通り抜けます。</li>
+        <li><b>ハーフミラー</b>（水色の点線）は、光を通しつつ反射もして、光を2つに分けます。</li>
+        <li>上級からは<b>赤と青の光</b>。赤い宝石には赤だけ、青い宝石には青だけ、紫の宝石には両方の光を当てます。</li>
+        <li>灰色のブロックは壁で、光を止めます。</li>
+      </ol>
+      <p class="help-tip">目安の手数以内で完成させると★3。</p>
+      <button id="helpClose" class="btn-primary">わかった</button>
+    </div>
+  </div>
+
+  <script src="light-core.js"></script>
+  <script src="layout.js"></script>
+  <script src="light.js"></script>
+</body>
+</html>
