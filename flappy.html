@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>パタパタ</title>
+  <meta name="theme-color" content="#f6f3ee">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="暇つぶし集">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="flappy.css">
+</head>
+<body data-game="flappy">
+  <main class="app">
+    <header class="top">
+      <a href="./" class="back" aria-label="ゲーム一覧へ">‹</a>
+      <select id="level" aria-label="難易度">
+        <option value="0">入門</option>
+        <option value="1">初級</option>
+        <option value="2">中級</option>
+        <option value="3">上級</option>
+        <option value="4">鬼</option>
+      </select>
+      <div class="status"><span id="best">ベスト 0</span></div>
+      <button id="sound" class="btn-text sound-btn" aria-label="効果音">🔇</button>
+    </header>
+
+    <div id="stage" class="stage">
+      <canvas id="cv"></canvas>
+      <button id="pause" class="pause-btn" aria-label="一時停止" hidden>❚❚</button>
+    </div>
+  </main>
+
+  <div id="overlay" class="overlay" hidden>
+    <div class="dialog">
+      <div id="medal" class="medal"></div>
+      <h2 id="dialogTitle">ゲームオーバー</h2>
+      <div class="scorebox">
+        <div><span class="lbl">スコア</span><span id="resScore" class="num">0</span></div>
+        <div><span class="lbl">ベスト</span><span id="resBest" class="num">0</span></div>
+      </div>
+      <p id="dialogBody"></p>
+      <button id="retry" class="btn-primary">もう一度</button>
+    </div>
+  </div>
+
+  <script src="flappy-core.js"></script>
+  <script src="layout.js"></script>
+  <script src="flappy.js"></script>
+</body>
+</html>

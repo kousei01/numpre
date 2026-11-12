@@ -1,6 +1,6 @@
 // ===== Service Worker：アプリ一式をキャッシュしてオフラインで動かす =====
 // ファイルを更新したら CACHE の番号を上げること（v1 → v2）
-const CACHE = 'numpre-v10';
+const CACHE = 'numpre-v11';
 const ASSETS = [
   './',
   './index.html',      // ゲーム選択画面
@@ -32,6 +32,11 @@ const ASSETS = [
   './light.css',
   './light-core.js',
   './light.js',
+  // パタパタ
+  './flappy.html',
+  './flappy.css',
+  './flappy-core.js',
+  './flappy.js',
   // 共通
   './layout.js',       // 配置の調整（共通）
   './manifest.json',

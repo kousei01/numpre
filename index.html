@@ -98,6 +98,22 @@
         </div>
         <span class="chev">›</span>
       </a>
+      <a class="game" href="flappy.html">
+        <div class="ico" style="background:#59b7ff">
+          <svg viewBox="0 0 10 10" width="36" height="36" aria-hidden="true">
+            <circle cx="5" cy="5.2" r="3.2" fill="#ff6f4f"/>
+            <ellipse cx="5.2" cy="6.4" rx="1.9" ry="1.3" fill="#ffe3d6"/>
+            <ellipse cx="3.6" cy="5.2" rx="1.6" ry="1" fill="#ff9a7a" transform="rotate(-25 3.6 5.2)"/>
+            <circle cx="6.3" cy="4.2" r="1" fill="#fff"/><circle cx="6.55" cy="4.2" r=".5" fill="#1f2430"/>
+            <path d="M8 4.8 L9.5 5.3 L8 5.8 Z" fill="#ffc23d"/>
+          </svg>
+        </div>
+        <div>
+          <h2>パタパタ</h2>
+          <p id="flappyInfo">5段階・タップで羽ばたいて、すき間をくぐり抜ける</p>
+        </div>
+        <span class="chev">›</span>
+      </a>
     </nav>
 
     <p id="offline" class="offline"></p>
@@ -125,6 +141,11 @@
     const lt = read('light-save-v1');
     if (lt && lt.status === 'playing' && lt.taps) {
       document.getElementById('lightInfo').innerHTML = '<span class="resume">続きから遊べます</span>';
+    }
+    const fs = read('flappy-stats-v1');
+    if (fs) {
+      const best = Math.max(0, ...Object.values(fs).map((v) => v.best || 0));
+      if (best > 0) document.getElementById('flappyInfo').innerHTML = `<span class="resume">ベスト ${best}</span>・タップで羽ばたいて、すき間をくぐる`;
     }
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   </script>
