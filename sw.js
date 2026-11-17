@@ -1,6 +1,6 @@
 // ===== Service Worker：アプリ一式をキャッシュしてオフラインで動かす =====
 // ファイルを更新したら CACHE の番号を上げること（v1 → v2）
-const CACHE = 'numpre-v13';
+const CACHE = 'numpre-v14';
 const ASSETS = [
   './',
   './index.html',      // ゲーム選択画面
@@ -37,7 +37,7 @@ const ASSETS = [
   './flappy.css',
   './flappy-core.js',
   './flappy.js',
-  // まぜまぜフルーツ
+  // ころころ惑星
   './merge.html',
   './merge.css',
   './merge-core.js',

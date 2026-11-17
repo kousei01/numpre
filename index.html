@@ -115,19 +115,17 @@
         <span class="chev">›</span>
       </a>
       <a class="game" href="merge.html">
-        <div class="ico" style="background:#ffb36b">
+        <div class="ico" style="background:#1c2546">
           <svg viewBox="0 0 10 10" width="36" height="36" aria-hidden="true">
-            <circle cx="4" cy="6" r="3" fill="#ffd8b4" stroke="#ee7f56" stroke-width=".4"/>
-            <circle cx="3.1" cy="5.8" r=".35" fill="#4a2c18"/><circle cx="4.9" cy="5.8" r=".35" fill="#4a2c18"/>
-            <path d="M3.5 6.7 Q4 7.2 4.5 6.7" fill="none" stroke="#4a2c18" stroke-width=".3" stroke-linecap="round"/>
-            <circle cx="7.6" cy="3.4" r="1.7" fill="#76bd34"/>
-            <path d="M7.7 1.8 Q8.6 1 9.3 1.6 Q8.5 2.3 7.7 1.8 Z" fill="#5cb84a"/>
-            <circle cx="8.2" cy="7.6" r="1" fill="#3a4aa8"/>
+            <circle cx="4.2" cy="5.6" r="3" fill="#3f8be0"/>
+            <circle cx="3.2" cy="5" r="1.1" fill="#5cbf6a"/><circle cx="5.3" cy="6.6" r=".8" fill="#5cbf6a"/>
+            <circle cx="7.6" cy="2.8" r="1.6" fill="#ff5a3c"/>
+            <circle cx="8" cy="6.8" r=".9" fill="#ffe066"/>
           </svg>
         </div>
         <div>
-          <h2>まぜまぜフルーツ</h2>
-          <p id="mergeInfo">同じ果物をくっつけて大きく。目指せフルーツバスケット</p>
+          <h2>ころころ惑星</h2>
+          <p id="mergeInfo">同じ惑星をくっつけて大きく。目指せ太陽</p>
         </div>
         <span class="chev">›</span>
       </a>
@@ -168,7 +166,7 @@
     if (mg && !mg.gameOver && mg.bodies && mg.bodies.length > 2) {
       document.getElementById('mergeInfo').innerHTML = '<span class="resume">続きから遊べます</span>';
     } else if (ms && ms.best > 0) {
-      document.getElementById('mergeInfo').innerHTML = `<span class="resume">ベスト ${ms.best}</span>・同じ果物をくっつけて大きく`;
+      document.getElementById('mergeInfo').innerHTML = `<span class="resume">ベスト ${ms.best}</span>・同じ惑星をくっつけて大きく`;
     }
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   </script>
