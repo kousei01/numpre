@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>まぜまぜフルーツ</title>
+  <meta name="theme-color" content="#f6f3ee">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="暇つぶし集">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="merge.css">
+</head>
+<body data-game="merge">
+  <main class="app">
+    <header class="top">
+      <a href="./" class="back" aria-label="ゲーム一覧へ">‹</a>
+      <div class="mscore"><span class="lbl">スコア</span><span id="score">0</span></div>
+      <div class="status"><span id="best">ベスト 0</span></div>
+      <button id="sound" class="btn-text sound-btn" aria-label="効果音">🔇</button>
+      <button id="restart" class="btn-text">新しく</button>
+    </header>
+
+    <div id="stage" class="mstage">
+      <canvas id="cv"></canvas>
+    </div>
+
+    <canvas id="chain" class="chain" aria-label="合体の順番"></canvas>
+  </main>
+
+  <div id="overlay" class="overlay" hidden>
+    <div class="dialog">
+      <div id="bigFruit" class="bigfruit"><canvas id="bigCv" width="160" height="160"></canvas></div>
+      <h2 id="dialogTitle">あふれた！</h2>
+      <div class="scorebox">
+        <div><span class="lbl">スコア</span><span id="resScore" class="num">0</span></div>
+        <div><span class="lbl">ベスト</span><span id="resBest" class="num">0</span></div>
+      </div>
+      <p id="dialogBody"></p>
+      <button id="retry" class="btn-primary">もう一度</button>
+      <button id="dialogClose" class="btn-text" style="margin-top:8px">盤面を見る</button>
+    </div>
+  </div>
+
+  <script src="merge-core.js"></script>
+  <script src="layout.js"></script>
+  <script src="merge.js"></script>
+</body>
+</html>
