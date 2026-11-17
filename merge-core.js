@@ -10,7 +10,12 @@ const MergeCore = (() => {
   const GRAVITY = 1500;              // px/s²
   const ITER = 8;                    // 押し戻しの繰り返し回数（多いほど積み重ねが安定）
   const DAMP = 0.9995;               // 空気抵抗（1秒で約 6% 減速）
-  const ROLL = 0.004;                // 床の転がり抵抗（1ステップに1回だけかける。1秒で約 38% 減速）
+  // 転がり：惑星は回転の勢い（角速度 w）を持つ。床の上では移動と回転が引っ張り合い、
+  // 「滑らずに転がる」状態に近づく。転がり抵抗は一定の強さ（等減速）なので、少しずつ減速して止まる
+  const ROLL_DECEL = 55;             // 転がり抵抗（px/s²）。小さいほど長く転がる
+  const GRIP = 0.35;                 // 床との食いつき（1ステップで滑りをどれだけ転がりに変えるか）
+  const SPIN_FOLLOW = 0.08;          // 惑星どうしが触れているときに、回転が動きに合わせていく速さ
+  const SPIN_DECAY = 0.6;            // 空中・積み重なった状態での回転の減り方（rad/s²）
   const WALL_SLIP = 0.01;            // 横の壁にこすれたときの縦方向の減速
   const BOUNCE = 0.08;               // 床・壁での跳ね返り（小さいほどドスンと止まる）
   // 速さの上限（px/s）。合体で押し出された惑星が弾け飛びすぎないように、上と横は低めにしている
@@ -44,7 +49,7 @@ const MergeCore = (() => {
   function body(level, x, y, vx = 0, vy = 0, dt = 1 / 120) {
     const r = KINDS[level].r;
     // full = 本来の半径。r は膨らんでいる途中の半径
-    return { id: nextId++, level, r, full: r, m: r * r, x, y, px: x - vx * dt, py: y - vy * dt, angle: 0, born: 0, over: 0, grow: 1 };
+    return { id: nextId++, level, r, full: r, m: r * r, x, y, px: x - vx * dt, py: y - vy * dt, angle: 0, w: 0, born: 0, over: 0, grow: 1, touch: false };
   }
 
   function createWorld(rand = Math.random) {
@@ -98,6 +103,7 @@ const MergeCore = (() => {
     }
 
     // 2. 重なりと壁を何度も直す
+    for (const b of bs) b.touch = false;
     for (let it = 0; it < ITER; it++) {
       for (let i = 0; i < bs.length; i++) {
         const a = bs[i];
@@ -108,6 +114,7 @@ const MergeCore = (() => {
           const d2 = dx * dx + dy * dy;
           if (d2 >= rr * rr || d2 === 0) continue;
           const d = Math.sqrt(d2), over = rr - d;
+          a.touch = true; c.touch = true;
           const nx = dx / d, ny = dy / d;
           const ka = c.m / (a.m + c.m), kc = a.m / (a.m + c.m);   // 重いほうは動きにくい
           a.x -= nx * over * ka; a.y -= ny * over * ka;
@@ -117,19 +124,36 @@ const MergeCore = (() => {
       for (const b of bs) walls(b);
     }
 
-    // 3. 床・壁との摩擦（ここで1回だけ）と、速さの上限
+    // 3. 転がり（床・惑星どうし）と、速さの上限
     for (const b of bs) {
-      let vx = b.x - b.px, vy = b.y - b.py;
-      if (b.y + b.r >= BOX_B - 0.5) vx *= 1 - ROLL;                              // 床の上を転がる
-      if (b.x - b.r <= BOX_L + 0.5 || b.x + b.r >= BOX_R - 0.5) vy *= 1 - WALL_SLIP; // 壁にこすれる
-      const up = MAX_UP * dt, side = MAX_SIDE * dt, down = MAX_DOWN * dt;
-      vx = Math.max(-side, Math.min(side, vx));
-      vy = Math.max(-up, Math.min(down, vy));
-      b.px = b.x - vx; b.py = b.y - vy;
+      let vx = (b.x - b.px) / dt, vy = (b.y - b.py) / dt;     // px/s
+      const onFloor = b.y + b.r >= BOX_B - 0.5;
+      if (onFloor) {
+        // 床との接点の滑り = 移動の速さ − 回転による表面の速さ。これを移動と回転に分けて打ち消す
+        // （中身の詰まった球と同じ配分：移動 2/7、回転 5/7）
+        const slip = vx - b.w * b.r;
+        vx -= slip * GRIP * (2 / 7);
+        b.w += (slip * GRIP * (5 / 7)) / b.r;
+        // 転がり抵抗：一定の強さで減速（ゼロを越えて逆向きにはしない）
+        const dec = (ROLL_DECEL * dt) / b.r;
+        b.w = Math.sign(b.w) * Math.max(0, Math.abs(b.w) - dec);
+        const vdec = ROLL_DECEL * dt * 0.4;
+        vx = Math.sign(vx) * Math.max(0, Math.abs(vx) - vdec);
+      } else if (b.touch) {
+        // 惑星の上を転がっているとき：回転を動きに少しずつ合わせ、ゆるやかに減速
+        b.w += (vx / b.r - b.w) * SPIN_FOLLOW;
+        b.w = Math.sign(b.w) * Math.max(0, Math.abs(b.w) - (ROLL_DECEL * 0.5 * dt) / b.r);
+      } else {
+        b.w = Math.sign(b.w) * Math.max(0, Math.abs(b.w) - SPIN_DECAY * dt);   // 空中ではほぼ回り続ける
+      }
+      if (b.x - b.r <= BOX_L + 0.5 || b.x + b.r >= BOX_R - 0.5) vy *= 1 - WALL_SLIP;   // 壁にこすれる
+      vx = Math.max(-MAX_SIDE, Math.min(MAX_SIDE, vx));
+      vy = Math.max(-MAX_UP, Math.min(MAX_DOWN, vy));
+      b.px = b.x - vx * dt; b.py = b.y - vy * dt;
     }
 
-    // 4. 転がる見た目（横の移動量で回す）
-    for (const b of bs) b.angle += (b.x - b.px) / b.r;
+    // 4. 転がる見た目（回転の勢いで回す。止まっても回転はなめらかにゆるむ）
+    for (const b of bs) b.angle += b.w * dt;
 
     // 5. 合体
     merge(w);
@@ -183,6 +207,7 @@ const MergeCore = (() => {
           const nb = body(lv, x, y);
           nb.px = x - vx; nb.py = y - vy;
           nb.grow = 0; nb.r = a.r; nb.m = nb.r * nb.r;   // 元の大きさから膨らむ
+          nb.w = ((a.w || 0) * a.r + (c.w || 0) * c.r) / (2 * a.r) * 0.5;
           nb.born = w.time - 1;   // 合体でできたものはすぐに判定の対象
           // 大きくなって壁にめり込まないように
           nb.x = Math.max(BOX_L + nb.full, Math.min(BOX_R - nb.full, nb.x));
@@ -201,7 +226,7 @@ const MergeCore = (() => {
   // 保存用（関数や乱数を除いた形）
   function serialize(w) {
     return {
-      bodies: w.bodies.map((b) => ({ level: b.level, x: b.x, y: b.y, px: b.px, py: b.py, angle: b.angle })),
+      bodies: w.bodies.map((b) => ({ level: b.level, x: b.x, y: b.y, px: b.px, py: b.py, angle: b.angle, w: b.w })),
       time: w.time, score: w.score, merges: w.merges, maxLevel: w.maxLevel, suns: w.suns, novas: w.novas,
       current: w.current, next: w.next, gameOver: w.gameOver,
     };
@@ -211,7 +236,7 @@ const MergeCore = (() => {
     Object.assign(w, { time: s.time, score: s.score, merges: s.merges, maxLevel: s.maxLevel, suns: s.suns || 0, novas: s.novas || 0, current: s.current, next: s.next, gameOver: s.gameOver });
     w.bodies = s.bodies.map((o) => {
       const b = body(o.level, o.x, o.y);
-      Object.assign(b, { px: o.px, py: o.py, angle: o.angle, born: s.time - 2 });
+      Object.assign(b, { px: o.px, py: o.py, angle: o.angle, w: o.w || 0, born: s.time - 2 });
       return b;
     });
     return w;
