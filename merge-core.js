@@ -9,10 +9,14 @@ const MergeCore = (() => {
   const BOX_L = 22, BOX_R = 378, BOX_B = 620, LINE_Y = 150, DROP_Y = 92;
   const GRAVITY = 1500;              // px/s²
   const ITER = 8;                    // 押し戻しの繰り返し回数（多いほど積み重ねが安定）
-  const DAMP = 0.9995;               // 空気抵抗（1秒で約 6% 減速）
+  const DAMP = 0.99995;              // 空気抵抗（ほぼなし。1秒で約 0.6% 減速）
   // 転がり：惑星は回転の勢い（角速度 w）を持つ。床の上では移動と回転が引っ張り合い、
   // 「滑らずに転がる」状態に近づく。転がり抵抗は一定の強さ（等減速）なので、少しずつ減速して止まる
-  const ROLL_DECEL = 55;             // 転がり抵抗（px/s²）。小さいほど長く転がる
+  const ROLL_DECEL = 3;              // 転がり抵抗（px/s²）。ほぼなし＝一度転がるとほぼずっと転がり続ける
+  // 静止摩擦：転がる速さがこれを下回ったら、すっと止まる。大きい（重い）惑星ほど動き出しにくい
+  //   ほし屑 ≈ 14px/s、地球 ≈ 41px/s、木星 ≈ 72px/s → 小さい惑星が当たったくらいでは大きい惑星は転がり出さない
+  const stopSpeed = (r) => 6 + r * 0.68;
+  const STOP_DECEL = 600;            // 止まるときの減速（px/s²）
   const GRIP = 0.35;                 // 床との食いつき（1ステップで滑りをどれだけ転がりに変えるか）
   const SPIN_FOLLOW = 0.08;          // 惑星どうしが触れているときに、回転が動きに合わせていく速さ
   const SPIN_DECAY = 0.6;            // 空中・積み重なった状態での回転の減り方（rad/s²）
@@ -128,21 +132,26 @@ const MergeCore = (() => {
     for (const b of bs) {
       let vx = (b.x - b.px) / dt, vy = (b.y - b.py) / dt;     // px/s
       const onFloor = b.y + b.r >= BOX_B - 0.5;
+      const atWall = b.x - b.r <= BOX_L + 0.5 || b.x + b.r >= BOX_R - 0.5;
       if (onFloor) {
+        // 何か（惑星・壁）に当たって進めないときは、回転を実際の動きにすぐ合わせる
+        // → 回転の勢いだけで相手を押し続けることがない
+        if (b.touch || atWall) b.w += (vx / b.r - b.w) * 0.5;
         // 床との接点の滑り = 移動の速さ − 回転による表面の速さ。これを移動と回転に分けて打ち消す
         // （中身の詰まった球と同じ配分：移動 2/7、回転 5/7）
         const slip = vx - b.w * b.r;
         vx -= slip * GRIP * (2 / 7);
         b.w += (slip * GRIP * (5 / 7)) / b.r;
-        // 転がり抵抗：一定の強さで減速（ゼロを越えて逆向きにはしない）
-        const dec = (ROLL_DECEL * dt) / b.r;
-        b.w = Math.sign(b.w) * Math.max(0, Math.abs(b.w) - dec);
-        const vdec = ROLL_DECEL * dt * 0.4;
-        vx = Math.sign(vx) * Math.max(0, Math.abs(vx) - vdec);
+        // 転がり抵抗（ほぼなし）と、遅くなったら止まる静止摩擦
+        const decel = Math.abs(vx) < stopSpeed(b.r) ? STOP_DECEL : ROLL_DECEL;
+        vx = Math.sign(vx) * Math.max(0, Math.abs(vx) - decel * dt);
+        b.w = Math.sign(b.w) * Math.max(0, Math.abs(b.w) - (decel * dt) / b.r);
+        // 上に積まれて床に押しつけられている惑星の、細かい上下の震えを止める
+        if (vy < 0 && vy > -40) vy = 0;
       } else if (b.touch) {
-        // 惑星の上を転がっているとき：回転を動きに少しずつ合わせ、ゆるやかに減速
+        // 惑星の上を転がっているとき：回転を動きに合わせる。ほとんど動いていなければ止める
         b.w += (vx / b.r - b.w) * SPIN_FOLLOW;
-        b.w = Math.sign(b.w) * Math.max(0, Math.abs(b.w) - (ROLL_DECEL * 0.5 * dt) / b.r);
+        if (Math.hypot(vx, vy) < stopSpeed(b.r) * 0.5) b.w *= 0.8;
       } else {
         b.w = Math.sign(b.w) * Math.max(0, Math.abs(b.w) - SPIN_DECAY * dt);   // 空中ではほぼ回り続ける
       }
