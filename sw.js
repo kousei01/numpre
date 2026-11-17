@@ -1,6 +1,6 @@
 // ===== Service Worker：アプリ一式をキャッシュしてオフラインで動かす =====
 // ファイルを更新したら CACHE の番号を上げること（v1 → v2）
-const CACHE = 'numpre-v15';
+const CACHE = 'numpre-v17';   // version.js の number とそろえる
 const ASSETS = [
   './',
   './index.html',      // ゲーム選択画面
@@ -44,6 +44,7 @@ const ASSETS = [
   './merge.js',
   // 共通
   './layout.js',       // 配置の調整（共通）
+  './version.js',      // バージョン番号
   './manifest.json',
   './icons/icon-180.png',
   './icons/icon-192.png',

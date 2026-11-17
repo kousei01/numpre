@@ -9,11 +9,14 @@ const MergeCore = (() => {
   const BOX_L = 22, BOX_R = 378, BOX_B = 620, LINE_Y = 150, DROP_Y = 92;
   const GRAVITY = 1500;              // px/s²
   const ITER = 8;                    // 押し戻しの繰り返し回数（多いほど積み重ねが安定）
-  const DAMP = 0.995;                // 空気抵抗
-  const FRICTION = 0.12;             // 壁・床との摩擦
-  const MAX_V = 1100;                // 速さの上限（px/s）。重なりの押し戻しで弾け飛ばないように
+  const DAMP = 0.9995;               // 空気抵抗（1秒で約 6% 減速）
+  const ROLL = 0.004;                // 床の転がり抵抗（1ステップに1回だけかける。1秒で約 38% 減速）
+  const WALL_SLIP = 0.01;            // 横の壁にこすれたときの縦方向の減速
+  const BOUNCE = 0.08;               // 床・壁での跳ね返り（小さいほどドスンと止まる）
+  // 速さの上限（px/s）。合体で押し出された惑星が弾け飛びすぎないように、上と横は低めにしている
+  const MAX_UP = 420, MAX_SIDE = 520, MAX_DOWN = 1400;
   const OVER_LIMIT = 2.5;            // 線を越えた状態がこの秒数続いたらアウト
-  const GROW = 0.12;                 // 合体でできた惑星が元の大きさまで膨らむ時間（秒）
+  const GROW = 0.3;                  // 合体でできた惑星が元の大きさまで膨らむ時間（秒）。ゆっくり膨らむほど周りを押す勢いが弱い
 
   // 12段階：ほし屑 → 小惑星 → 月 → 水星 → 火星 → 金星 → 地球 → 海王星 → 天王星 → 土星 → 木星 → 太陽
   //          →（太陽2つで）超新星になって消える。消えたらまた積めるので、上限なくスコアを稼げる
@@ -82,7 +85,6 @@ const MergeCore = (() => {
     const bs = w.bodies;
 
     // 1. 動かす（Verlet）。合体直後の惑星は少しずつ膨らませる
-    const vmax = MAX_V * dt;
     for (const b of bs) {
       if (b.grow < 1) {
         b.grow = Math.min(1, b.grow + dt / GROW);
@@ -90,9 +92,7 @@ const MergeCore = (() => {
         b.r = from + (b.full - from) * b.grow;
         b.m = b.r * b.r;
       }
-      let vx = (b.x - b.px) * DAMP, vy = (b.y - b.py) * DAMP;
-      const sp = Math.hypot(vx, vy);
-      if (sp > vmax) { vx *= vmax / sp; vy *= vmax / sp; }
+      const vx = (b.x - b.px) * DAMP, vy = (b.y - b.py) * DAMP;
       b.px = b.x; b.py = b.y;
       b.x += vx; b.y += vy + GRAVITY * dt * dt;
     }
@@ -117,13 +117,24 @@ const MergeCore = (() => {
       for (const b of bs) walls(b);
     }
 
-    // 3. 転がる見た目（横の移動量で回す）
+    // 3. 床・壁との摩擦（ここで1回だけ）と、速さの上限
+    for (const b of bs) {
+      let vx = b.x - b.px, vy = b.y - b.py;
+      if (b.y + b.r >= BOX_B - 0.5) vx *= 1 - ROLL;                              // 床の上を転がる
+      if (b.x - b.r <= BOX_L + 0.5 || b.x + b.r >= BOX_R - 0.5) vy *= 1 - WALL_SLIP; // 壁にこすれる
+      const up = MAX_UP * dt, side = MAX_SIDE * dt, down = MAX_DOWN * dt;
+      vx = Math.max(-side, Math.min(side, vx));
+      vy = Math.max(-up, Math.min(down, vy));
+      b.px = b.x - vx; b.py = b.y - vy;
+    }
+
+    // 4. 転がる見た目（横の移動量で回す）
     for (const b of bs) b.angle += (b.x - b.px) / b.r;
 
-    // 4. 合体
+    // 5. 合体
     merge(w);
 
-    // 5. ゲームオーバー判定：落としてから 1 秒以上たった惑星が線を越えている状態が 2.5 秒続いたらアウト
+    // 6. ゲームオーバー判定：落としてから 1 秒以上たった惑星が線を越えている状態が 2.5 秒続いたらアウト
     //    （動いているかどうかは見ない。連打で上の惑星を揺らし続けても、あふれたらちゃんと終わるように）
     let anyOver = false;
     for (const b of w.bodies) {
@@ -140,11 +151,11 @@ const MergeCore = (() => {
     return w.events;
   }
 
+  // 壁・床：めり込んだら押し戻し、ぶつかった向きの速さだけ小さく跳ね返す（横すべりはそのまま＝転がる）
   function walls(b) {
-    const vx = b.x - b.px, vy = b.y - b.py;
-    if (b.x - b.r < BOX_L) { b.x = BOX_L + b.r; b.py = b.y - vy * (1 - FRICTION); }
-    if (b.x + b.r > BOX_R) { b.x = BOX_R - b.r; b.py = b.y - vy * (1 - FRICTION); }
-    if (b.y + b.r > BOX_B) { b.y = BOX_B - b.r; b.px = b.x - vx * (1 - FRICTION); }
+    if (b.x - b.r < BOX_L) { const vx = b.x - b.px; b.x = BOX_L + b.r; if (vx < 0) b.px = b.x + vx * BOUNCE; }
+    if (b.x + b.r > BOX_R) { const vx = b.x - b.px; b.x = BOX_R - b.r; if (vx > 0) b.px = b.x + vx * BOUNCE; }
+    if (b.y + b.r > BOX_B) { const vy = b.y - b.py; b.y = BOX_B - b.r; if (vy > 0) b.py = b.y + vy * BOUNCE; }
   }
 
   function merge(w) {
