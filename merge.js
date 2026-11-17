@@ -21,14 +21,14 @@ let world = null;
 let aimX = 200;
 let cool = 0;
 let scale = 1;
-let particles = [], texts = [], rings = [];
+let particles = [], texts = [], rings = [], novaRings = [];
 let sunFlash = 0, t = 0, acc = 0, lastT = 0, saveT = 0, overShown = false;
 let sound = load(SOUND_KEY, false);
 
 // ---------- 開始・保存 ----------
 function newGame() {
   world = M.createWorld();
-  particles = []; texts = []; rings = []; sunFlash = 0; overShown = false; cool = 0;
+  particles = []; texts = []; rings = []; novaRings = []; sunFlash = 0; overShown = false; cool = 0;
   $('#overlay').hidden = true;
   save();
   updateHud();
@@ -100,18 +100,21 @@ function update(dt) {
   texts = texts.filter((s) => s.life > 0);
   for (const r of rings) r.life -= dt;
   rings = rings.filter((r) => r.life > 0);
+  for (const r of novaRings) r.life -= dt;
+  novaRings = novaRings.filter((r) => r.life > 0);
   if (!world) return;
 
   for (const e of M.step(world, dt)) {
     if (e.type === 'merge') onMerge(e);
-    if (e.type === 'sun') onSun(e);
+    if (e.type === 'nova') onNova(e);
     if (e.type === 'gameover') onGameOver();
   }
   saveT += dt;
   if (saveT > 2) { saveT = 0; save(); }
 }
 
-const COLORS = ['#ffe066', '#a8865f', '#e9ecf2', '#a98bff', '#ff5a3c', '#ff8fb8', '#3f8be0', '#4a4ae0', '#5fe0d8', '#e8c27a', '#f08a3c'];
+const COLORS = ['#ffe066', '#a8865f', '#e9ecf2', '#a98bff', '#ff5a3c', '#ff8fb8', '#3f8be0', '#4a4ae0', '#5fe0d8', '#e8c27a', '#f08a3c', '#ffcf2a'];
+const SUN_LV = M.SUN - 1;           // 太陽の段階
 
 function onMerge(e) {
   const r = M.KINDS[e.level].r;
@@ -121,21 +124,31 @@ function onMerge(e) {
     particles.push({ x: e.x + Math.cos(a) * r * 0.6, y: e.y + Math.sin(a) * r * 0.6, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60, life: 0.6, max: 0.6, color: COLORS[e.level], size: 2 + Math.random() * 3 });
   }
   texts.push({ x: e.x, y: e.y - r * 0.4, text: `+${e.points}`, life: 0.9, max: 0.9, big: e.level >= 6 });
-  if (e.level >= 6) texts.push({ x: e.x, y: e.y + 6, text: M.KINDS[e.level].name + '！', life: 1.1, max: 1.1, big: false, name: true });
+  if (e.level >= 6 && e.level !== SUN_LV) texts.push({ x: e.x, y: e.y + 6, text: M.KINDS[e.level].name + '！', life: 1.1, max: 1.1, big: false, name: true });
   if (sound) tone(330 * Math.pow(2, e.level / 6), 520 * Math.pow(2, e.level / 6), 0.12, 0.05, 'sine');
+  // 太陽ができたときは特別な演出
+  if (e.level === SUN_LV) {
+    sunFlash = 0.7;
+    texts.push({ x: M.W / 2, y: 250, text: '☀ 太陽誕生！', life: 2, max: 2, big: true, center: true });
+    if (sound) [523, 659, 784, 1047].forEach((f, k) => tone(f, f, 0.35, 0.045, 'sine', k * 0.08));
+  }
   bumpScore();
   drawChain();
 }
 
-function onSun(e) {
+// 太陽どうしがくっつくと超新星になって消える（大ボーナス。また積めるので上限なく稼げる）
+function onNova(e) {
   sunFlash = 1;
-  for (let k = 0; k < 60; k++) {
-    const a = Math.random() * Math.PI * 2, sp = 120 + Math.random() * 380;
-    particles.push({ x: e.x, y: e.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 80, life: 1.2, max: 1.2, color: Math.random() < 0.5 ? '#ffd23f' : '#ff8a3d', size: 3 + Math.random() * 4 });
+  texts = texts.filter((s) => !s.center && !s.name);   // 「太陽誕生！」などと文字が重ならないように
+  novaRings.push({ x: e.x, y: e.y, life: 1.2, max: 1.2 });
+  for (let k = 0; k < 90; k++) {
+    const a = Math.random() * Math.PI * 2, sp = 150 + Math.random() * 450;
+    const col = ['#ffffff', '#ffe066', '#ff8a3d', '#ff5ad1', '#7cd6ff'][k % 5];
+    particles.push({ x: e.x, y: e.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 80, life: 1.4, max: 1.4, color: col, size: 3 + Math.random() * 4 });
   }
-  texts.push({ x: M.W / 2, y: 260, text: '☀ 太陽誕生！', life: 2, max: 2, big: true, center: true });
-  texts.push({ x: M.W / 2, y: 300, text: `+${e.points}`, life: 2, max: 2, big: false, center: true });
-  if (sound) [523, 659, 784, 1047, 1319].forEach((f, k) => tone(f, f, 0.4, 0.045, 'sine', k * 0.09));
+  texts.push({ x: M.W / 2, y: 250, text: '💥 超新星！', life: 2.2, max: 2.2, big: true, center: true });
+  texts.push({ x: M.W / 2, y: 290, text: `+${e.points}`, life: 2.2, max: 2.2, big: false, center: true });
+  if (sound) [392, 523, 659, 784, 1047, 1319, 1568].forEach((f, k) => tone(f, f, 0.45, 0.045, 'sine', k * 0.07));
   bumpScore();
   drawChain();
 }
@@ -155,6 +168,7 @@ function onGameOver() {
   if (isNew) stats.best = world.score;
   stats.bestLevel = Math.max(stats.bestLevel || 0, world.maxLevel);
   stats.suns = (stats.suns || 0) + world.suns;
+  stats.novas = (stats.novas || 0) + (world.novas || 0);
   store(STATS_KEY, stats);
   save();
   if (sound) tone(300, 90, 0.5, 0.07, 'sawtooth');
@@ -164,7 +178,7 @@ function onGameOver() {
     $('#dialogTitle').textContent = isNew && world.score > 0 ? 'ベスト更新！' : 'あふれた！';
     $('#dialogBody').textContent =
       `いちばん大きな惑星：${M.KINDS[world.maxLevel].name}` +
-      `${world.suns ? `\n☀ 太陽を ${world.suns} 個つくった！` : ''}\n` +
+      `${world.suns ? `\n☀ 太陽 ${world.suns} 個` : ''}${world.novas ? `・💥 超新星 ${world.novas} 回` : ''}\n` +
       `合体 ${world.merges} 回・プレイ ${stats.plays} 回`;
     const bc = $('#bigCv').getContext('2d');
     bc.clearRect(0, 0, 160, 160);
@@ -298,7 +312,18 @@ function draw() {
   }
   ctx.globalAlpha = 1;
 
-  // 太陽ができた瞬間のまぶしい光
+  // 超新星の衝撃波
+  for (const r of novaRings) {
+    const k = 1 - r.life / r.max;
+    ctx.globalAlpha = 1 - k;
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 10 * (1 - k) + 2;
+    ctx.beginPath(); ctx.arc(r.x, r.y, 30 + k * 420, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = '#ff9ae8'; ctx.lineWidth = 5 * (1 - k) + 1;
+    ctx.beginPath(); ctx.arc(r.x, r.y, 20 + k * 300, 0, Math.PI * 2); ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+
+  // 太陽・超新星の瞬間のまぶしい光
   if (sunFlash > 0) {
     const rg = ctx.createRadialGradient(M.W / 2, 280, 10, M.W / 2, 280, 420);
     rg.addColorStop(0, `rgba(255,236,150,${sunFlash})`);
@@ -340,6 +365,7 @@ function planet(c, lv, x, y, r, angle) {
   c.save();
   c.translate(x, y);
   if (lv === 9) ring(c, r, true);            // 土星の輪（後ろ半分）
+  if (lv === 11) corona(c, r);               // 太陽のまわりの光
   c.save();
   c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.clip();
   c.rotate(angle);
@@ -391,6 +417,11 @@ function planet(c, lv, x, y, r, angle) {
       base('#fff0c8', '#d4a548');
       band(-0.55, 0.14, 'rgba(160,110,30,0.3)'); band(-0.15, 0.1, 'rgba(160,110,30,0.25)'); band(0.3, 0.16, 'rgba(160,110,30,0.3)');
       break;
+    case 11: {                                                                   // 太陽：まぶしい黄色、表面がゆらめく
+      base('#fffbd0', '#ffb21f');
+      for (let k = 0; k < 7; k++) blob(Math.cos(k * 0.9 + t * 0.6) * 0.55, Math.sin(k * 1.3 + t * 0.5) * 0.55, 0.16, 'rgba(255,140,0,0.22)');
+      break;
+    }
     case 10:                                                                     // 木星：オレンジのしまと斑点
       base('#ffd2a0', '#e0702a');
       band(-0.7, 0.14, 'rgba(150,60,20,0.35)'); band(-0.35, 0.12, 'rgba(255,240,220,0.5)'); band(-0.05, 0.16, 'rgba(150,60,20,0.35)');
@@ -409,6 +440,21 @@ function planet(c, lv, x, y, r, angle) {
     starShape(c, r * 0.95, -r * 0.85, r * 0.38);
   }
   if (lv === 9) ring(c, r, false);            // 土星の輪（手前半分）
+  c.restore();
+}
+
+function corona(c, r) {
+  const gr = c.createRadialGradient(0, 0, r * 0.9, 0, 0, r * 1.25);
+  gr.addColorStop(0, 'rgba(255,200,60,0.55)'); gr.addColorStop(1, 'rgba(255,140,40,0)');
+  c.fillStyle = gr;
+  c.beginPath(); c.arc(0, 0, r * 1.25, 0, Math.PI * 2); c.fill();
+  c.save();
+  c.rotate(t * 0.4);
+  c.fillStyle = 'rgba(255,190,50,0.85)';
+  for (let k = 0; k < 12; k++) {
+    c.rotate(Math.PI / 6);
+    c.beginPath(); c.moveTo(-r * 0.12, -r * 0.98); c.lineTo(0, -r * 1.16); c.lineTo(r * 0.12, -r * 0.98); c.closePath(); c.fill();
+  }
   c.restore();
 }
 
@@ -466,7 +512,7 @@ function drawChain() {
   for (let k = 0; k < n; k++) {
     const cx = step * (k + 0.5), cy = 20;
     const r = Math.min(step * 0.38, 7 + k * 0.9);
-    const lit = k <= reached || (k === M.SUN && world && world.suns);
+    const lit = k <= reached || (k === M.SUN && world && world.novas);
     // 今と次の惑星には下線
     if (world && (k === world.current || k === world.next)) {
       c.globalAlpha = 1;
@@ -474,17 +520,18 @@ function drawChain() {
       c.fillRect(cx - step * 0.38, h - 3, step * 0.76, 3);
     }
     c.globalAlpha = lit ? 1 : 0.3;
-    if (k === M.SUN) {
-      const gr = c.createRadialGradient(cx, cy, 1, cx, cy, r * 1.3);
-      gr.addColorStop(0, '#fff6b0'); gr.addColorStop(0.6, '#ffb83f'); gr.addColorStop(1, 'rgba(255,120,40,0)');
-      c.fillStyle = gr; c.beginPath(); c.arc(cx, cy, r * 1.3, 0, Math.PI * 2); c.fill();
-    } else {
+    if (k === M.SUN) {                       // 超新星（星がはじけるマーク）
+      c.fillStyle = '#ffe066';
+      c.beginPath();
+      for (let q = 0; q < 16; q++) { const ang = q * Math.PI / 8, rr = q % 2 ? r * 0.45 : r * 1.15; c.lineTo(cx + Math.cos(ang) * rr, cy + Math.sin(ang) * rr); }
+      c.closePath(); c.fill();
+      c.fillStyle = '#ffffff'; c.beginPath(); c.arc(cx, cy, r * 0.35, 0, Math.PI * 2); c.fill()    } else {
       planet(c, k, cx, cy, r, 0);
     }
     c.fillStyle = ink;
     c.font = `700 ${Math.min(9, step * 0.27)}px ${FONT}`;
     c.textAlign = 'center'; c.textBaseline = 'middle';
-    c.fillText(k === M.SUN ? '太陽' : M.KINDS[k].name, cx, 42);
+    c.fillText(k === M.SUN ? '超新星' : M.KINDS[k].name, cx, 42);
     if (k < n - 1) {
       c.globalAlpha = 0.35;
       c.font = '9px sans-serif';

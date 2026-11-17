@@ -15,8 +15,8 @@ const MergeCore = (() => {
   const OVER_LIMIT = 2.5;            // 線を越えた状態がこの秒数続いたらアウト
   const GROW = 0.12;                 // 合体でできた惑星が元の大きさまで膨らむ時間（秒）
 
-  // 11段階：ほし屑 → 小惑星 → 月 → 水星 → 火星 → 金星 → 地球 → 海王星 → 天王星 → 土星 → 木星
-  //          →（木星2つで）太陽
+  // 12段階：ほし屑 → 小惑星 → 月 → 水星 → 火星 → 金星 → 地球 → 海王星 → 天王星 → 土星 → 木星 → 太陽
+  //          →（太陽2つで）超新星になって消える。消えたらまた積めるので、上限なくスコアを稼げる
   const KINDS = [
     { name: 'ほし屑', r: 12  },
     { name: '小惑星', r: 16  },
@@ -29,12 +29,13 @@ const MergeCore = (() => {
     { name: '天王星', r: 72  },
     { name: '土星',   r: 84  },
     { name: '木星',   r: 98  },
+    { name: '太陽',   r: 112 },   // 箱の幅 356 に2つ横並びできない大きさ → 縦に重なって必ずくっつく
   ];
-  const SUN = KINDS.length;          // 木星どうしが合体すると太陽になって消える（大ボーナス）
+  const SUN = KINDS.length;          // 太陽どうしが合体すると超新星になって消える（大ボーナス）
   const DROP_KINDS = 5;              // 落とせるのは小さいほうから5種類
   // 得点：合体してできた惑星の段階に応じて（三角数）
   const POINTS = KINDS.map((_, i) => ((i + 1) * (i + 2)) / 2);
-  const SUN_BONUS = 100;
+  const SUN_BONUS = 200;             // 超新星のボーナス
 
   let nextId = 1;
   function body(level, x, y, vx = 0, vy = 0, dt = 1 / 120) {
@@ -45,7 +46,7 @@ const MergeCore = (() => {
 
   function createWorld(rand = Math.random) {
     return {
-      bodies: [], time: 0, score: 0, merges: 0, maxLevel: 0, suns: 0,
+      bodies: [], time: 0, score: 0, merges: 0, maxLevel: 0, suns: 0, novas: 0,
       rand, events: [],
       current: randomDrop(rand, 0), next: randomDrop(rand, 0),
       overTime: 0, gameOver: false,
@@ -162,10 +163,10 @@ const MergeCore = (() => {
         const x = (a.x + c.x) / 2, y = (a.y + c.y) / 2;
         const lv = a.level + 1;
         w.merges++;
-        if (lv === SUN) {
+        if (lv === SUN) {                      // 太陽 + 太陽 → 超新星（消える）
           w.score += SUN_BONUS;
-          w.suns++;
-          w.events.push({ type: 'sun', x, y, points: SUN_BONUS });
+          w.novas++;
+          w.events.push({ type: 'nova', x, y, points: SUN_BONUS });
         } else {
           const vx = ((a.x - a.px) + (c.x - c.px)) / 2, vy = ((a.y - a.py) + (c.y - c.py)) / 2;
           const nb = body(lv, x, y);
@@ -177,6 +178,7 @@ const MergeCore = (() => {
           born.push(nb);
           w.score += POINTS[lv];
           if (lv > w.maxLevel) w.maxLevel = lv;
+          if (lv === SUN - 1) w.suns++;            // 太陽ができた
           w.events.push({ type: 'merge', x, y, level: lv, points: POINTS[lv] });
         }
         break;
@@ -189,13 +191,13 @@ const MergeCore = (() => {
   function serialize(w) {
     return {
       bodies: w.bodies.map((b) => ({ level: b.level, x: b.x, y: b.y, px: b.px, py: b.py, angle: b.angle })),
-      time: w.time, score: w.score, merges: w.merges, maxLevel: w.maxLevel, suns: w.suns,
+      time: w.time, score: w.score, merges: w.merges, maxLevel: w.maxLevel, suns: w.suns, novas: w.novas,
       current: w.current, next: w.next, gameOver: w.gameOver,
     };
   }
   function restore(s, rand = Math.random) {
     const w = createWorld(rand);
-    Object.assign(w, { time: s.time, score: s.score, merges: s.merges, maxLevel: s.maxLevel, suns: s.suns || 0, current: s.current, next: s.next, gameOver: s.gameOver });
+    Object.assign(w, { time: s.time, score: s.score, merges: s.merges, maxLevel: s.maxLevel, suns: s.suns || 0, novas: s.novas || 0, current: s.current, next: s.next, gameOver: s.gameOver });
     w.bodies = s.bodies.map((o) => {
       const b = body(o.level, o.x, o.y);
       Object.assign(b, { px: o.px, py: o.py, angle: o.angle, born: s.time - 2 });
