@@ -221,3 +221,16 @@ body.layout-editing .layout-cover { display: flex; }
 .top .status { gap: 8px; }
 .top select { font-size: 15px; padding: 7px 4px 7px 8px; }
 .top { gap: 6px; }
+
+/* 予備の調整ボタン：ヘッダーの ✥ が画面の外に出たときだけ、画面の隅に出る（layout.js） */
+.layout-fab {
+  position: fixed; z-index: 110;
+  width: 48px; height: 48px; padding: 0; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--accent);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  color: var(--accent);
+  box-shadow: 0 4px 14px rgba(0,0,0,.25);
+}
+.layout-fab[hidden] { display: none; }
+.layout-fab.on { background: var(--accent); color: var(--surface); }

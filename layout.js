@@ -2,6 +2,8 @@
 // 動画の小窓（ピクチャ・イン・ピクチャ）と重ならないように、
 // ゲーム画面全体をドラッグで移動・ピンチや スライダーで縮小できるようにする。
 // 設定はゲームごとに localStorage（layout-v1）へ保存。
+// ヘッダーの ✥ ボタンが画面の外に出て押せなくなったときは、画面の隅に「予備の ✥ ボタン」を出す
+// （予備のボタンはゲーム画面と一緒に動かないので、どこへ動かしても必ず押せる）。
 'use strict';
 
 (() => {
@@ -28,6 +30,7 @@
     app.style.transform = moved ? `translate(${pos.x}px, ${pos.y}px) scale(${pos.s})` : '';
     slider.value = Math.round(pos.s * 100);
     pct.textContent = `${Math.round(pos.s * 100)}%`;
+    updateFab();
   }
 
   // 画面外に行きすぎないように（最低 80px は画面内に残す）
@@ -57,6 +60,38 @@
     '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
     '<path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg>';
   header.appendChild(btn);
+
+  // ---------- 予備の調整ボタン（ヘッダーのボタンが見えないときだけ出す） ----------
+  const fab = btn.cloneNode(true);
+  fab.className = 'layout-fab';
+  fab.hidden = true;
+  document.body.appendChild(fab);
+
+  // ヘッダーのボタンが、押せる大きさで画面の中に見えているか
+  function headerBtnVisible() {
+    const r = btn.getBoundingClientRect();
+    const vw = window.innerWidth, vh = window.innerHeight, m = 4;
+    return r.width >= 16 && r.height >= 16 && r.top >= m && r.left >= m && r.bottom <= vh - m && r.right <= vw - m;
+  }
+  // 予備のボタンは、ゲーム画面と重ならない隅に出す（どこも重なるなら右上）
+  function updateFab() {
+    if (headerBtnVisible()) { fab.hidden = true; return; }
+    fab.hidden = false;
+    fab.classList.toggle('on', editing);
+    const a = app.getBoundingClientRect();
+    const vw = window.innerWidth, vh = window.innerHeight, size = 48, gap = 12;
+    const safeTop = 44, safeBottom = editing ? 150 : 28;   // 編集中は下のパネルを避ける
+    const corners = [
+      { x: vw - size - gap, y: safeTop },                  // 右上
+      { x: gap, y: safeTop },                              // 左上
+      { x: vw - size - gap, y: vh - size - safeBottom },   // 右下
+      { x: gap, y: vh - size - safeBottom },               // 左下
+    ];
+    const hits = (c) => !(c.x + size < a.left || c.x > a.right || c.y + size < a.top || c.y > a.bottom);
+    const c = corners.find((k) => !hits(k)) || corners[0];
+    fab.style.left = `${c.x}px`;
+    fab.style.top = `${c.y}px`;
+  }
 
   // ---------- 編集中にゲームを覆う膜（ドラッグ・ピンチを受け取る） ----------
   const cover = document.createElement('div');
@@ -89,15 +124,20 @@
     editing = true;
     document.body.classList.add('layout-editing');
     panel.hidden = false;
+    btn.classList.add('on');
     apply();
   }
   function close() {
     editing = false;
     document.body.classList.remove('layout-editing');
     panel.hidden = true;
+    btn.classList.remove('on');
     clamp(); apply(); persist();
   }
   btn.addEventListener('click', () => (editing ? close() : open()));
+  fab.addEventListener('click', () => (editing ? close() : open()));
+  // ゲーム側のタップ処理に吸い込まれないように
+  fab.addEventListener('pointerdown', (e) => e.stopPropagation());
   panel.querySelector('.lp-done').addEventListener('click', close);
 
   // サイズ変更は画面の中心がずれにくいよう、見た目の中央を基準に調整する
@@ -173,8 +213,9 @@
   cover.addEventListener('pointercancel', up);
 
   // 画面の向きが変わったときなどに、はみ出しを直す
-  window.addEventListener('resize', () => { if (!isDefault()) { clamp(); apply(); persist(); } });
+  window.addEventListener('resize', () => { if (!isDefault()) { clamp(); apply(); persist(); } else updateFab(); });
+  window.addEventListener('scroll', updateFab, { passive: true });
 
   apply();
-  if (!isDefault()) requestAnimationFrame(() => { clamp(); apply(); });
+  requestAnimationFrame(() => { if (!isDefault()) clamp(); apply(); });
 })();
