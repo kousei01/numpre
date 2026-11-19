@@ -166,7 +166,7 @@
       const best = Math.max(0, ...Object.values(fs).map((v) => v.best || 0));
       if (best > 0) document.getElementById('flappyInfo').innerHTML = `<span class="resume">ベスト ${best}</span>・タップで羽ばたいて、すき間をくぐる`;
     }
-    const mg = read('merge-save-v1'), ms = read('merge-stats-v1');
+    const mg = read('merge-save-v2'), ms = read('merge-stats-v1');
     if (mg && !mg.gameOver && mg.bodies && mg.bodies.length > 2) {
       document.getElementById('mergeInfo').innerHTML = '<span class="resume">続きから遊べます</span>';
     } else if (ms && ms.best > 0) {

@@ -1,6 +1,6 @@
 // ===== Service Worker：アプリ一式をキャッシュしてオフラインで動かす =====
 // ファイルを更新したら CACHE の番号を上げること（v1 → v2）
-const CACHE = 'numpre-v20';   // version.js の number とそろえる
+const CACHE = 'numpre-v21';   // version.js の number とそろえる
 const ASSETS = [
   './',
   './index.html',      // ゲーム選択画面

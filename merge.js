@@ -1,7 +1,7 @@
 // ===== ころころ惑星 描画・入力・ゲームの流れ =====
 'use strict';
 
-const SAVE_KEY = 'merge-save-v1';
+const SAVE_KEY = 'merge-save-v2';   // 惑星を 11 種類にしたので保存の形を新しくした
 const STATS_KEY = 'merge-stats-v1';
 const SOUND_KEY = 'merge-sound';
 const HELP_KEY = 'merge-help-seen';
@@ -113,7 +113,7 @@ function update(dt) {
   if (saveT > 2) { saveT = 0; save(); }
 }
 
-const COLORS = ['#ffe066', '#a8865f', '#e9ecf2', '#a98bff', '#ff5a3c', '#ff8fb8', '#3f8be0', '#4a4ae0', '#5fe0d8', '#e8c27a', '#f08a3c', '#ffcf2a'];
+const COLORS = ['#ffe066', '#e9ecf2', '#a98bff', '#ff5a3c', '#ff8fb8', '#3f8be0', '#4a4ae0', '#5fe0d8', '#e8c27a', '#f08a3c', '#ffcf2a'];
 const SUN_LV = M.SUN - 1;           // 太陽の段階
 
 function onMerge(e) {
@@ -123,8 +123,8 @@ function onMerge(e) {
     const a = Math.random() * Math.PI * 2, sp = 80 + Math.random() * (120 + e.level * 20);
     particles.push({ x: e.x + Math.cos(a) * r * 0.6, y: e.y + Math.sin(a) * r * 0.6, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60, life: 0.6, max: 0.6, color: COLORS[e.level], size: 2 + Math.random() * 3 });
   }
-  texts.push({ x: e.x, y: e.y - r * 0.4, text: `+${e.points}`, life: 0.9, max: 0.9, big: e.level >= 6 });
-  if (e.level >= 6 && e.level !== SUN_LV) texts.push({ x: e.x, y: e.y + 6, text: M.KINDS[e.level].name + '！', life: 1.1, max: 1.1, big: false, name: true });
+  texts.push({ x: e.x, y: e.y - r * 0.4, text: `+${e.points}`, life: 0.9, max: 0.9, big: e.level >= 5 });
+  if (e.level >= 5 && e.level !== SUN_LV) texts.push({ x: e.x, y: e.y + 6, text: M.KINDS[e.level].name + '！', life: 1.1, max: 1.1, big: false, name: true });
   if (sound) tone(330 * Math.pow(2, e.level / 6), 520 * Math.pow(2, e.level / 6), 0.12, 0.05, 'sine');
   // 太陽ができたときは特別な演出
   if (e.level === SUN_LV) {
@@ -359,13 +359,13 @@ function roundRect(x, y, w, h, r) {
 
 // ---------- 惑星の絵（すべてオリジナル。転がると模様と顔が回る） ----------
 // 見分けやすいように、本物の色にこだわらず、段階ごとに色の系統をはっきり変えている
-//   ほし屑=黄 / 小惑星=茶 / 月=白 / 水星=紫 / 火星=赤 / 金星=ピンク / 地球=青と緑
+//   ほし屑=黄 / 月=白 / 水星=紫 / 火星=赤 / 金星=ピンク / 地球=青と緑
 //   海王星=藍 / 天王星=水色 / 土星=金色＋輪 / 木星=オレンジのしま
 function planet(c, lv, x, y, r, angle) {
   c.save();
   c.translate(x, y);
-  if (lv === 9) ring(c, r, true);            // 土星の輪（後ろ半分）
-  if (lv === 11) corona(c, r);               // 太陽のまわりの光
+  if (lv === 8) ring(c, r, true);            // 土星の輪（後ろ半分）
+  if (lv === 10) corona(c, r);               // 太陽のまわりの光
   c.save();
   c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.clip();
   c.rotate(angle);
@@ -378,51 +378,47 @@ function planet(c, lv, x, y, r, angle) {
   const band = (y0, h, color) => { c.fillStyle = color; c.fillRect(-r, y0 * r, r * 2, h * r); };
   switch (lv) {
     case 0: base('#fffbe0', '#ffcf3a'); break;                                  // ほし屑
-    case 1:                                                                      // 小惑星：ごつごつの茶色
-      base('#d6b48a', '#7a5a38');
-      blob(0.3, 0.2, 0.22, 'rgba(70,45,20,0.35)'); blob(-0.35, -0.1, 0.16, 'rgba(70,45,20,0.35)'); blob(0.05, -0.45, 0.12, 'rgba(70,45,20,0.3)');
-      break;
-    case 2:                                                                      // 月：白っぽくクレーター
+    case 1:                                                                      // 月：白っぽくクレーター
       base('#ffffff', '#c9cdd8');
       blob(-0.35, 0.25, 0.2, 'rgba(130,135,150,0.3)'); blob(0.35, -0.3, 0.14, 'rgba(130,135,150,0.3)'); blob(0.3, 0.45, 0.1, 'rgba(130,135,150,0.25)');
       break;
-    case 3:                                                                      // 水星：むらさき
+    case 2:                                                                      // 水星：むらさき
       base('#d9c8ff', '#7a5ad6');
       blob(-0.3, -0.35, 0.18, 'rgba(70,40,140,0.35)'); blob(0.4, 0.15, 0.2, 'rgba(70,40,140,0.3)'); blob(-0.2, 0.5, 0.12, 'rgba(70,40,140,0.3)');
       break;
-    case 4:                                                                      // 火星：赤
+    case 3:                                                                      // 火星：赤
       base('#ff8a6a', '#d0301e');
       blob(-0.3, 0.3, 0.3, 'rgba(120,20,10,0.35)'); blob(0.45, -0.2, 0.2, 'rgba(120,20,10,0.3)');
       band(-1.0, 0.22, 'rgba(255,255,255,0.8)');
       break;
-    case 5:                                                                      // 金星：ピンク
+    case 4:                                                                      // 金星：ピンク
       base('#ffd6e6', '#f0709e');
       band(-0.55, 0.18, 'rgba(200,60,110,0.22)'); band(0.05, 0.22, 'rgba(200,60,110,0.2)'); band(0.55, 0.15, 'rgba(200,60,110,0.22)');
       break;
-    case 6:                                                                      // 地球：青い海と緑の陸
+    case 5:                                                                      // 地球：青い海と緑の陸
       base('#7cc4ff', '#1f5fc4');
       blob(-0.35, -0.15, 0.32, '#5cbf6a'); blob(-0.1, 0.1, 0.22, '#5cbf6a'); blob(0.45, 0.35, 0.26, '#5cbf6a'); blob(0.5, -0.45, 0.15, '#5cbf6a');
       band(-0.72, 0.1, 'rgba(255,255,255,0.65)'); band(0.62, 0.08, 'rgba(255,255,255,0.55)');
       break;
-    case 7:                                                                      // 海王星：藍色
+    case 6:                                                                      // 海王星：藍色
       base('#8a8aff', '#2a22a8');
       band(-0.3, 0.12, 'rgba(255,255,255,0.2)'); band(0.25, 0.1, 'rgba(20,10,90,0.35)');
       blob(0.35, -0.05, 0.14, 'rgba(15,10,80,0.45)');
       break;
-    case 8:                                                                      // 天王星：水色
+    case 7:                                                                      // 天王星：水色
       base('#e0fffb', '#3cc9c0');
       band(-0.1, 0.1, 'rgba(255,255,255,0.4)');
       break;
-    case 9:                                                                      // 土星：金色
+    case 8:                                                                      // 土星：金色
       base('#fff0c8', '#d4a548');
       band(-0.55, 0.14, 'rgba(160,110,30,0.3)'); band(-0.15, 0.1, 'rgba(160,110,30,0.25)'); band(0.3, 0.16, 'rgba(160,110,30,0.3)');
       break;
-    case 11: {                                                                   // 太陽：まぶしい黄色、表面がゆらめく
+    case 10: {                                                                   // 太陽：まぶしい黄色、表面がゆらめく
       base('#fffbd0', '#ffb21f');
       for (let k = 0; k < 7; k++) blob(Math.cos(k * 0.9 + t * 0.6) * 0.55, Math.sin(k * 1.3 + t * 0.5) * 0.55, 0.16, 'rgba(255,140,0,0.22)');
       break;
     }
-    case 10:                                                                     // 木星：オレンジのしまと斑点
+    case 9:                                                                     // 木星：オレンジのしまと斑点
       base('#ffd2a0', '#e0702a');
       band(-0.7, 0.14, 'rgba(150,60,20,0.35)'); band(-0.35, 0.12, 'rgba(255,240,220,0.5)'); band(-0.05, 0.16, 'rgba(150,60,20,0.35)');
       band(0.3, 0.12, 'rgba(255,240,220,0.5)'); band(0.55, 0.16, 'rgba(150,60,20,0.3)');
@@ -439,7 +435,7 @@ function planet(c, lv, x, y, r, angle) {
     c.fillStyle = 'rgba(255,255,255,0.95)';
     starShape(c, r * 0.95, -r * 0.85, r * 0.38);
   }
-  if (lv === 9) ring(c, r, false);            // 土星の輪（手前半分）
+  if (lv === 8) ring(c, r, false);            // 土星の輪（手前半分）
   c.restore();
 }
 
@@ -471,7 +467,7 @@ function ring(c, r, back) {
 }
 
 function face(c, r, lv) {
-  const light = lv === 7;                     // 藍色の海王星は白い目
+  const light = lv === 6;                     // 藍色の海王星は白い目
   const ink = light ? '#ffffff' : '#2b2340';
   const ex = r * 0.3, ey = -r * 0.05, es = Math.max(1.2, r * 0.09);
   c.fillStyle = ink;
