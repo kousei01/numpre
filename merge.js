@@ -8,7 +8,7 @@ const HELP_KEY = 'merge-help-seen';
 
 const M = MergeCore;
 const DT = 1 / 120;
-const COOLDOWN = 0.45;               // 連続で落とせる間隔（秒）
+const COOLDOWN = 0.55;               // 連続で落とせる間隔（秒）
 const $ = (q) => document.querySelector(q);
 const stage = $('#stage');
 const cv = $('#cv');

@@ -1,6 +1,6 @@
 // ===== Service Worker：アプリ一式をキャッシュしてオフラインで動かす =====
 // ファイルを更新したら CACHE の番号を上げること（v1 → v2）
-const CACHE = 'numpre-v19';   // version.js の number とそろえる
+const CACHE = 'numpre-v20';   // version.js の number とそろえる
 const ASSETS = [
   './',
   './index.html',      // ゲーム選択画面
@@ -40,6 +40,7 @@ const ASSETS = [
   // ころころ惑星
   './merge.html',
   './merge.css',
+  './matter.min.js',   // 物理演算ライブラリ（Matter.js 0.19.0, MIT）
   './merge-core.js',
   './merge.js',
   // 共通
